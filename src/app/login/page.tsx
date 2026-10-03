@@ -1,60 +1,62 @@
-'use client';
-
 import Link from 'next/link';
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-      <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-md w-full text-left">
+    <main className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+      <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-md w-full">
+        {/* Enlace para volver al Inicio */}
         <Link 
           href="/" 
-          className="text-xs text-slate-400 hover:text-slate-600 mb-6 inline-block transition"
+          className="inline-block text-xs font-semibold text-slate-500 hover:text-emerald-700 transition mb-6"
         >
-          ← Volver al inicio
+          ← Volver al Inicio
         </Link>
 
+        {/* Título */}
         <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar Sesión</h1>
-        <p className="text-sm text-slate-500 mb-6">
-          Ingresá tus datos para acceder a tu cuenta
+        <p className="text-xs text-slate-500 mb-6">
+          Ingresá tus datos para acceder a tu cuenta.
         </p>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        {/* Formulario */}
+        <form className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1 uppercase tracking-wider">
-              Correo electrónico
+            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+              Correo Electrónico
             </label>
             <input 
               type="email" 
               placeholder="tu@email.com" 
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
               Contraseña
             </label>
             <input 
               type="password" 
               placeholder="••••••••" 
-              className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
             />
           </div>
 
           <button 
-            type="submit" 
-            className="w-full bg-blue-600 text-white font-medium py-2 rounded-xl hover:bg-blue-700 transition text-sm pt-2"
+            type="button" 
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition text-sm mt-2"
           >
             Ingresar
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-500">
+        {/* Link a Registro */}
+        <p className="text-xs text-slate-500 text-center mt-6">
           ¿No tenés cuenta?{' '}
-          <Link href="/registro" className="text-blue-600 font-semibold hover:underline">
+          <Link href="/registro" className="text-emerald-600 font-semibold hover:underline">
             Registrate acá
           </Link>
-        </div>
+        </p>
       </div>
     </main>
   );

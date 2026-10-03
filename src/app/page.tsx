@@ -1,62 +1,65 @@
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-md w-full">
-        {/* Enlace para volver */}
-        <Link 
-          href="/" 
-          className="text-xs text-slate-500 hover:text-slate-800 transition flex items-center gap-1 mb-6"
-        >
-          ← Volver al Inicio
-        </Link>
+    <main className="min-h-screen bg-emerald-100/60 flex flex-col items-center justify-center p-6 text-center">
+      {/* Logo de la Municipalidad de Funes */}
+      <img 
+        src="/Logo muni Funes.png" 
+        alt="Logo Municipalidad de Funes" 
+        className="h-20 w-auto mb-4 mx-auto object-contain" 
+      />
 
-        {/* Título */}
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar Sesión</h1>
-        <p className="text-xs text-slate-500 mb-6">
-          Ingresá tus datos para acceder a tu cuenta.
-        </p>
+      {/* Etiqueta institucional */}
+      <span className="text-xs font-bold tracking-widest text-emerald-800 bg-emerald-200/80 px-3.5 py-1 rounded-full uppercase mb-4 border border-emerald-300">
+        Municipalidad de Funes
+      </span>
 
-        {/* Formulario */}
-        <form className="flex flex-col gap-4">
+      {/* Título Principal */}
+      <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 max-w-2xl leading-tight mb-4">
+        Tu próxima oportunidad laboral
+      </h1>
+
+      {/* Bajada / Subtítulo */}
+      <p className="text-slate-700 max-w-lg mb-8 text-sm md:text-base">
+        Encontrá trabajo cerca de tu casa o publicá tus búsquedas laborales para sumar vecinos a tu equipo.
+      </p>
+
+      {/* Tarjetas de Opciones */}
+      <div className="grid md:grid-cols-2 gap-4 max-w-xl w-full">
+        {/* Opción Vecino */}
+        <div className="bg-white p-6 rounded-2xl border border-emerald-200 shadow-md text-left flex flex-col justify-between">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-              Correo Electrónico
-            </label>
-            <input 
-              type="email" 
-              placeholder="tu@email.com" 
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
-            />
+            <div className="text-2xl mb-2">💼</div>
+            <h2 className="font-bold text-slate-800 text-lg">Busco Trabajo</h2>
+            <p className="text-xs text-slate-500 mt-1 mb-6">
+              Cargá tu CV y postulate a las ofertas de la ciudad.
+            </p>
           </div>
-
-          <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
-              Contraseña
-            </label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
-            />
-          </div>
-
-          <button 
-            type="button" 
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition text-sm mt-2"
+          <Link 
+            href="/login" 
+            className="block text-center bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-xl hover:bg-emerald-700 transition text-sm shadow-sm"
           >
-            Ingresar
-          </button>
-        </form>
-
-        {/* Link a Registro */}
-        <p className="text-xs text-slate-500 text-center mt-6">
-          ¿No tenés cuenta?{' '}
-          <Link href="/register" className="text-emerald-600 font-semibold hover:underline">
-            Registrate acá
+            Ingresar como Vecino
           </Link>
-        </p>
+        </div>
+
+        {/* Opción Empresa */}
+        <div className="bg-white p-6 rounded-2xl border border-emerald-200 shadow-md text-left flex flex-col justify-between">
+          <div>
+            <div className="text-2xl mb-2">🏢</div>
+            <h2 className="font-bold text-slate-800 text-lg">Soy Empresa / Comercio</h2>
+            <p className="text-xs text-slate-500 mt-1 mb-6">
+              Publicá avisos de empleo y encontrá perfiles capacitados.
+            </p>
+          </div>
+          <Link 
+            href="/login" 
+            className="block text-center bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl hover:bg-slate-900 transition text-sm shadow-sm"
+          >
+            Publicar Búsqueda
+          </Link>
+        </div>
       </div>
     </main>
   );
