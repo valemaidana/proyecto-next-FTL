@@ -17,9 +17,10 @@ export default function Home() {
 
       {/* Título Principal */}
       <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 max-w-2xl leading-tight mb-4">
-        Conectamos el talento local con las mejores oportunidades
+        Tu próxima oportunidad laboral
       </h1>
 
+      {/* Bajada / Subtítulo */}
       <p className="text-slate-600 max-w-lg mb-8 text-sm md:text-base">
         Encontrá trabajo cerca de tu casa o publicá tus búsquedas laborales para sumar vecinos a tu equipo.
       </p>
