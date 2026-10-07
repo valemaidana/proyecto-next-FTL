@@ -24,6 +24,9 @@ export default function Navbar() {
           <Link href="/ofertas" className="hover:text-emerald-700 transition">
             Ofertas
           </Link>
+          <Link href="/mis-postulaciones" className="hover:text-emerald-700 transition">
+            Mis Postulaciones
+          </Link>
           <Link 
             href="/login" 
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg transition"

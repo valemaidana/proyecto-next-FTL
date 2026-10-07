@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
@@ -9,8 +10,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function OfertasPage() {
   const router = useRouter()
+  const [busqueda, setBusqueda] = useState('')
+  const [filtroArea, setFiltroArea] = useState('Todas')
 
-  // Lista de ofertas de ejemplo
   const ofertas = [
     {
       id: '1',
@@ -38,8 +40,15 @@ export default function OfertasPage() {
     }
   ]
 
+  // Filtrar ofertas según búsqueda y área seleccionada
+  const ofertasFiltradas = ofertas.filter((oferta) => {
+    const coincideTexto = oferta.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                          oferta.descripcion.toLowerCase().includes(busqueda.toLowerCase())
+    const coincideArea = filtroArea === 'Todas' || oferta.area === filtroArea
+    return coincideTexto && coincideArea
+  })
+
   const manejarPostulacion = async (tituloOferta: string) => {
-    // 1. Obtener el usuario actual
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -48,14 +57,12 @@ export default function OfertasPage() {
       return
     }
 
-    // 2. Consultar el perfil en Supabase
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    // 3. Validar si el perfil existe y si tiene los datos obligatorios cargados
     const perfilIncompleto = 
       !profile || 
       !profile.nombre || 
@@ -71,7 +78,33 @@ export default function OfertasPage() {
       return
     }
 
-    // 4. Si el perfil está completo
+    const { data: yaPostulado } = await supabase
+      .from('postulaciones')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('oferta_titulo', tituloOferta)
+      .maybeSingle()
+
+    if (yaPostulado) {
+      alert(`Ya te habías postulado anteriormente a: ${tituloOferta}`)
+      return
+    }
+
+    const { error } = await supabase
+      .from('postulaciones')
+      .insert([
+        {
+          user_id: user.id,
+          oferta_titulo: tituloOferta
+        }
+      ])
+
+    if (error) {
+      alert("Hubo un error al registrar tu postulación. Intentá de nuevo.")
+      console.error(error)
+      return
+    }
+
     alert(`¡Te postulaste con éxito a: ${tituloOferta}!`)
   }
 
@@ -82,63 +115,108 @@ export default function OfertasPage() {
           Ofertas Laborales Disponibles
         </h1>
         <p style={{ color: '#666' }}>
-          Explorá las búsquedas abiertas y postulaste directamente desde el portal.
+          Explorá las búsquedas abiertas y postulate directamente desde el portal.
         </p>
       </div>
 
+      {/* Barra de Búsqueda y Filtros */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+        <input 
+          type="text"
+          placeholder="🔍 Buscar por puesto o descripción..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            border: '1px solid #cbd5e1',
+            fontSize: '1rem',
+            outline: 'none',
+            width: '100%'
+          }}
+        />
+
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {['Todas', 'Secretaría de Gobierno', 'Obras Públicas', 'Seguridad Ciudadana'].map((area) => (
+            <button
+              key={area}
+              onClick={() => setFiltroArea(area)}
+              style={{
+                padding: '0.4rem 1rem',
+                borderRadius: '20px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: filtroArea === area ? '#0f172a' : '#ffffff',
+                color: filtroArea === area ? '#ffffff' : '#475569',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}
+            >
+              {area}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Listado de Ofertas */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {ofertas.map((oferta) => (
-          <div 
-            key={oferta.id} 
-            style={{ 
-              border: '1px solid #e2e8f0', 
-              padding: '1.5rem', 
-              borderRadius: '10px', 
-              backgroundColor: '#ffffff', 
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.8rem'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div>
-                <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#0f172a' }}>
-                  {oferta.titulo}
-                </h2>
-                <p style={{ color: '#0284c7', fontWeight: '600', fontSize: '0.9rem', marginTop: '0.2rem' }}>
-                  {oferta.area}
-                </p>
+        {ofertasFiltradas.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>
+            No se encontraron ofertas que coincidan con tu búsqueda.
+          </p>
+        ) : (
+          ofertasFiltradas.map((oferta) => (
+            <div 
+              key={oferta.id} 
+              style={{ 
+                border: '1px solid #e2e8f0', 
+                padding: '1.5rem', 
+                borderRadius: '10px', 
+                backgroundColor: '#ffffff', 
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.8rem'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#0f172a' }}>
+                    {oferta.titulo}
+                  </h2>
+                  <p style={{ color: '#0284c7', fontWeight: '600', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                    {oferta.area}
+                  </p>
+                </div>
+                <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '500' }}>
+                  📍 {oferta.ubicacion} • {oferta.modalidad}
+                </span>
               </div>
-              <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '500' }}>
-                📍 {oferta.ubicacion} • {oferta.modalidad}
-              </span>
-            </div>
 
-            <p style={{ color: '#4b5563', lineHeight: '1.5', fontSize: '0.95rem' }}>
-              {oferta.descripcion}
-            </p>
+              <p style={{ color: '#4b5563', lineHeight: '1.5', fontSize: '0.95rem' }}>
+                {oferta.descripcion}
+              </p>
 
-            <div style={{ marginTop: '0.5rem' }}>
-              <button
-                onClick={() => manejarPostulacion(oferta.titulo)}
-                style={{
-                  backgroundColor: '#059669',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.6rem 1.4rem',
-                  borderRadius: '6px',
-                  fontWeight: '600',
-                  fontSize: '0.95rem',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-              >
-                Postularme
-              </button>
+              <div style={{ marginTop: '0.5rem' }}>
+                <button
+                  onClick={() => manejarPostulacion(oferta.titulo)}
+                  style={{
+                    backgroundColor: '#059669',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.6rem 1.4rem',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Postularme
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </main>
   )
