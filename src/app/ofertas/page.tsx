@@ -1,94 +1,145 @@
-import Link from 'next/link';
+'use client'
 
-// Datos de prueba para mostrar las ofertas laborales de Funes
-const OFERTAS = [
-  {
-    id: 1,
-    titulo: 'Atención al Cliente y Caja',
-    empresa: 'Comercio Centro Funes',
-    ubicacion: 'Funes Centro',
-    modalidad: 'Presencial',
-    jornada: 'Medio Tiempo',
-    fecha: 'Hace 2 días',
-  },
-  {
-    id: 2,
-    titulo: 'Auxiliar de Depósito y Logística',
-    empresa: 'Distribuidora Funes',
-    ubicacion: 'Zona Industrial',
-    modalidad: 'Presencial',
-    jornada: 'Tiempo Completo',
-    fecha: 'Publicado hoy',
-  },
-  {
-    id: 3,
-    titulo: 'Administrativo / Contable',
-    empresa: 'Estudio de Gestión',
-    ubicacion: 'Funes Norte',
-    modalidad: 'Híbrido',
-    jornada: 'Tiempo Completo',
-    fecha: 'Hace 3 días',
-  },
-];
+import { useRouter } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function OfertasPage() {
+  const router = useRouter()
+
+  // Lista de ofertas de ejemplo
+  const ofertas = [
+    {
+      id: '1',
+      titulo: 'Auxiliar Administrativo / Atención al Vecino',
+      area: 'Secretaría de Gobierno',
+      ubicacion: 'Funes, Santa Fe',
+      modalidad: 'Presencial',
+      descripcion: 'Atención presencial y telefónica a vecinos, carga de trámites en el sistema municipal y gestión de archivos administrativos.'
+    },
+    {
+      id: '2',
+      titulo: 'Personal de Mantenimiento e Infraestructura',
+      area: 'Obras Públicas',
+      ubicacion: 'Funes, Santa Fe',
+      modalidad: 'Presencial',
+      descripcion: 'Tareas generales de mantenimiento de espacios públicos, reparación de mobiliario urbano y apoyo en cuadrillas operativas.'
+    },
+    {
+      id: '3',
+      titulo: 'Inspector de Tránsito y Control Urbano',
+      area: 'Seguridad Ciudadana',
+      ubicacion: 'Funes, Santa Fe',
+      modalidad: 'Presencial',
+      descripcion: 'Control del tránsito vehicular en la vía pública, verificación de licencias y ordenamiento en zonas escolares y comerciales.'
+    }
+  ]
+
+  const manejarPostulacion = async (tituloOferta: string) => {
+    // 1. Obtener el usuario actual
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      alert("Tenés que iniciar sesión para postularte.")
+      router.push('/login')
+      return
+    }
+
+    // 2. Consultar el perfil en Supabase
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    // 3. Validar si el perfil existe y si tiene los datos obligatorios cargados
+    const perfilIncompleto = 
+      !profile || 
+      !profile.nombre || 
+      !profile.apellido || 
+      !profile.dni || 
+      !profile.telefono || 
+      !profile.direccion || 
+      !profile.localidad
+
+    if (perfilIncompleto) {
+      alert(`Para postularte a "${tituloOferta}", primero tenés que completar tu perfil con tus datos personales.`)
+      router.push('/perfil')
+      return
+    }
+
+    // 4. Si el perfil está completo
+    alert(`¡Te postulaste con éxito a: ${tituloOferta}!`)
+  }
+
   return (
-    <main className="max-w-5xl mx-auto px-6 py-10">
-      {/* Encabezado de la sección */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
-          Ofertas Laborales en Funes
+    <main style={{ minHeight: '80vh', padding: '2rem 1rem', maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1a1a1a', marginBottom: '0.5rem' }}>
+          Ofertas Laborales Disponibles
         </h1>
-        <p className="text-sm text-slate-600">
-          Explorá las búsquedas activas de empresas y comercios de la ciudad.
+        <p style={{ color: '#666' }}>
+          Explorá las búsquedas abiertas y postulaste directamente desde el portal.
         </p>
       </div>
 
-      {/* Buscador simple (simulado) */}
-      <div className="bg-white p-4 rounded-2xl border border-emerald-200 shadow-sm mb-8 flex flex-col md:flex-row gap-3">
-        <input 
-          type="text" 
-          placeholder="Buscar por puesto o palabra clave..." 
-          className="flex-1 border border-slate-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
-        />
-        <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2 rounded-xl transition text-sm">
-          Buscar
-        </button>
-      </div>
-
-      {/* Listado de Tarjetas de Ofertas */}
-      <div className="flex flex-col gap-4">
-        {OFERTAS.map((oferta) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {ofertas.map((oferta) => (
           <div 
-            key={oferta.id}
-            className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4"
+            key={oferta.id} 
+            style={{ 
+              border: '1px solid #e2e8f0', 
+              padding: '1.5rem', 
+              borderRadius: '10px', 
+              backgroundColor: '#ffffff', 
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.8rem'
+            }}
           >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                  {oferta.empresa}
-                </span>
-                <span className="text-xs text-slate-400">• {oferta.fecha}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#0f172a' }}>
+                  {oferta.titulo}
+                </h2>
+                <p style={{ color: '#0284c7', fontWeight: '600', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                  {oferta.area}
+                </p>
               </div>
-              <h2 className="text-lg font-bold text-slate-800">
-                {oferta.titulo}
-              </h2>
-              <div className="flex items-center gap-3 text-xs text-slate-500 mt-2">
-                <span>📍 {oferta.ubicacion}</span>
-                <span>💼 {oferta.modalidad}</span>
-                <span>⏰ {oferta.jornada}</span>
-              </div>
+              <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '500' }}>
+                📍 {oferta.ubicacion} • {oferta.modalidad}
+              </span>
             </div>
 
-            <Link 
-              href="/login" 
-              className="inline-block text-center bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition whitespace-nowrap"
-            >
-              Postularme
-            </Link>
+            <p style={{ color: '#4b5563', lineHeight: '1.5', fontSize: '0.95rem' }}>
+              {oferta.descripcion}
+            </p>
+
+            <div style={{ marginTop: '0.5rem' }}>
+              <button
+                onClick={() => manejarPostulacion(oferta.titulo)}
+                style={{
+                  backgroundColor: '#059669',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.6rem 1.4rem',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+              >
+                Postularme
+              </button>
+            </div>
           </div>
         ))}
       </div>
     </main>
-  );
+  )
 }
