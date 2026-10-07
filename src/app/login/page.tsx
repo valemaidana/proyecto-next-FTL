@@ -1,63 +1,81 @@
-import Link from 'next/link';
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault() // Evita que la página se recargue de golpe
+    setLoading(true)
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      alert('Error al iniciar sesión: ' + error.message)
+      setLoading(false)
+      return
+    }
+
+    alert('¡Inicio de sesión exitoso!')
+    window.location.href = '/ofertas' // O la ruta a la que quieras redirigir
+  }
+
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-md w-full">
-        {/* Enlace para volver al Inicio */}
-        <Link 
-          href="/" 
-          className="inline-block text-xs font-semibold text-slate-500 hover:text-emerald-700 transition mb-6"
-        >
-          ← Volver al Inicio
-        </Link>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md border border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-800 mb-6 text-center">
+          Iniciar Sesión
+        </h1>
 
-        {/* Título */}
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">Iniciar Sesión</h1>
-        <p className="text-xs text-slate-500 mb-6">
-          Ingresá tus datos para acceder a tu cuenta.
-        </p>
-
-        {/* Formulario */}
-        <form className="flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Correo Electrónico
             </label>
-            <input 
-              type="email" 
-              placeholder="tu@email.com" 
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="correo@ejemplo.com"
+              className="w-full px-3 py-2 border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Contraseña
             </label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-3 py-2 border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <button 
-            type="button" 
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition text-sm mt-2"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition duration-200 disabled:opacity-50"
           >
-            Ingresar
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
-
-        {/* Link a Registro */}
-        <p className="text-xs text-slate-500 text-center mt-6">
-          ¿No tenés cuenta?{' '}
-          <Link href="/registro" className="text-emerald-600 font-semibold hover:underline">
-            Registrate acá
-          </Link>
-        </p>
       </div>
     </main>
-  );
+  )
 }
