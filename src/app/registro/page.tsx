@@ -9,7 +9,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function RegistroPage() {
-  const [fullName, setFullName] = useState('')
+  const [fullname, setFullname] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('postulante') // 'postulante' o 'empresa'
@@ -19,42 +19,43 @@ export default function RegistroPage() {
     e.preventDefault()
     setLoading(true)
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: role, // Guarda el rol elegido en Supabase
-        },
-      },
-    })
+    try {
+      // 1. Creamos el usuario en Supabase Auth y guardamos los datos extra en options.data
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullname,
+            role: role, // Guarda 'postulante' o 'empresa'
+            localidad: 'Funes'
+          }
+        }
+      })
 
-    if (signUpError) {
-      alert(signUpError.message)
+      if (signUpError) {
+        alert(signUpError.message)
+        setLoading(false)
+        return
+      }
+
+      // 2. Si el registro fue exitoso
+      alert('¡Registro exitoso! Ya podés iniciar sesión.')
+      window.location.href = '/login'
+
+    } catch (err: any) {
+      alert('Ocurrió un error inesperado.')
+      console.error(err)
+    } finally {
       setLoading(false)
-      return
     }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (signInError) {
-      alert(signInError.message)
-      setLoading(false)
-      return
-    }
-
-    window.location.href = '/ofertas'
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md border border-slate-200">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md border border-slate-100">
         <h1 className="text-2xl font-bold text-center text-slate-800 mb-6">
-          Portal Empleo de Funes
+          Crear Cuenta
         </h1>
 
         <form onSubmit={handleRegister} className="space-y-4">
@@ -65,10 +66,10 @@ export default function RegistroPage() {
             <input
               type="text"
               required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
               placeholder="Ej: Juan Pérez o Mi Empresa S.A."
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 
@@ -79,7 +80,7 @@ export default function RegistroPage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
             >
               <option value="postulante">Buscar Empleo (Postulante)</option>
               <option value="empresa">Ofrecer Empleo (Empresa)</option>
@@ -95,8 +96,8 @@ export default function RegistroPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="correo@ejemplo.com"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="tu@correo.com"
+              className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 
@@ -107,24 +108,23 @@ export default function RegistroPage() {
             <input
               type="password"
               required
-              minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
           >
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="text-center text-sm text-slate-600 mt-6">
           ¿Ya tenés cuenta?{' '}
           <Link href="/login" className="text-blue-600 font-semibold hover:underline">
             Ingresá acá
