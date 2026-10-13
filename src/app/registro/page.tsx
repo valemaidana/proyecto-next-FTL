@@ -12,6 +12,7 @@ export default function RegistroPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('postulante') // 'postulante' o 'empresa'
   const [loading, setLoading] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -22,7 +23,10 @@ export default function RegistroPage() {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          role: role, // Guarda el rol elegido en Supabase
+        },
       },
     })
 
@@ -56,16 +60,30 @@ export default function RegistroPage() {
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Nombre Completo
+              Nombre Completo / Nombre de la Empresa
             </label>
             <input
               type="text"
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ej: Juan Pérez"
+              placeholder="Ej: Juan Pérez o Mi Empresa S.A."
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Tipo de Cuenta
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="postulante">Buscar Empleo (Postulante)</option>
+              <option value="empresa">Ofrecer Empleo (Empresa)</option>
+            </select>
           </div>
 
           <div>
