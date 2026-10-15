@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
@@ -10,8 +10,24 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function OfertasPage() {
   const router = useRouter()
+  const [role, setRole] = useState<string | null>(null)
+  const [loadingRole, setLoadingRole] = useState(true)
+
   const [busqueda, setBusqueda] = useState('')
   const [filtroArea, setFiltroArea] = useState('Todas')
+
+  // Verificar el rol del usuario al cargar la página
+  useEffect(() => {
+    async function checkUserRole() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const userRole = user.user_metadata?.role || 'postulante'
+        setRole(userRole)
+      }
+      setLoadingRole(false)
+    }
+    checkUserRole()
+  }, [])
 
   const ofertas = [
     {
@@ -108,6 +124,41 @@ export default function OfertasPage() {
     alert(`¡Te postulaste con éxito a: ${tituloOferta}!`)
   }
 
+  if (loadingRole) {
+    return <p style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>Cargando panel...</p>
+  }
+
+  // VISTA EXCLUSIVA PARA EMPRESAS
+  if (role === 'empresa') {
+    return (
+      <main style={{ minHeight: '80vh', padding: '2rem 1rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '2rem', background: '#f8fafc', padding: '2rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0f172a', marginBottom: '0.5rem' }}>
+            Panel de Empresa 🏢
+          </h1>
+          <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
+            Desde acá podés gestionar tus búsquedas activas y publicar nuevas ofertas laborales para encontrar postulantes.
+          </p>
+          <button 
+            onClick={() => alert("Próximamente: Formulario para publicar nueva oferta.")}
+            style={{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              border: 'none',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            + Publicar Nueva Oferta Laboral
+          </button>
+        </div>
+      </main>
+    )
+  }
+
+  // VISTA PARA POSTULANTES (La original con buscador y listado)
   return (
     <main style={{ minHeight: '80vh', padding: '2rem 1rem', maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -189,7 +240,7 @@ export default function OfertasPage() {
                   </p>
                 </div>
                 <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '500' }}>
-                  📍 {oferta.ubicacion} • {oferta.modalidad}
+                  📍 {oferta.ubicacion} - {oferta.modalidad}
                 </span>
               </div>
 
