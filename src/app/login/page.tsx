@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -8,71 +9,102 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [cargando, setCargando] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault() // Evita que la página se recargue de golpe
-    setLoading(true)
+  const manejarLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCargando(true)
 
+    // 1. Iniciar sesión universal con Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (error) {
-      alert('Error al iniciar sesión: ' + error.message)
-      setLoading(false)
+      alert(`Error al iniciar sesión: ${error.message}`)
+      setCargando(false)
       return
     }
 
-    alert('¡Inicio de sesión exitoso!')
-    window.location.href = '/ofertas' // O la ruta a la que quieras redirigir
+    // 2. Obtener el rol guardado en los metadatos del usuario
+    const userRole = data.user?.user_metadata?.role || 'postulante'
+
+    setCargando(false)
+
+    // 3. Redirigir inteligentemente según el rol
+    if (userRole === 'admin') {
+      router.push('/admin') // Oficina de Empleo
+    } else if (userRole === 'empresa') {
+      router.push('/empresa') // Panel de Empresa
+    } else {
+      router.push('/ofertas') // Vecino / Postulante
+    }
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md border border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 mb-6 text-center">
+    <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
+      <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '2.5rem', borderRadius: '12px', maxWidth: '400px', width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0f172a', marginBottom: '0.5rem', textAlign: 'center' }}>
           Iniciar Sesión
         </h1>
+        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+          Ingresá con tu correo y contraseña para acceder al portal.
+        </p>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form
+  onSubmit={(e) => {
+    alert('El formulario respondió')
+    manejarLogin(e)
+  }}
+  style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}
+>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Correo Electrónico
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: '#334155', marginBottom: '0.3rem' }}>
+              Correo Electrónico:
             </label>
-            <input
-              type="email"
+            <input 
+              type="email" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="correo@ejemplo.com"
-              className="w-full px-3 py-2 border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="tu-correo@ejemplo.com"
+              style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Contraseña
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: '#334155', marginBottom: '0.3rem' }}>
+              Contraseña:
             </label>
-            <input
-              type="password"
+            <input 
+              type="password" 
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ width: '100%', padding: '0.7rem', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }}
             />
           </div>
 
-          <button
+          <button 
             type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition duration-200 disabled:opacity-50"
+            disabled={cargando}
+            style={{ 
+              background: '#0284c7', 
+              color: '#ffffff', 
+              border: 'none', 
+              padding: '0.8rem', 
+              borderRadius: '6px', 
+              fontWeight: '600', 
+              cursor: 'pointer',
+              marginTop: '0.5rem'
+            }}
           >
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            {cargando ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
       </div>
